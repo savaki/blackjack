@@ -67,6 +67,16 @@ func Play(deck *Deck, bet int) int {
 	}
 }
 
+func Spacer(s string) {
+	if *verbose {
+		fmt.Println("")
+		for i := 0; i < 65; i++ {
+			fmt.Print(s)
+		}
+		fmt.Println("\n")
+	}
+}
+
 func Log(format string, args ...interface{}) (int, error) {
 	if *verbose {
 		return fmt.Printf(format, args...)

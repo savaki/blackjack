@@ -151,16 +151,6 @@ func (d *Deck) Remaining() int {
 	return len(d.cards) - d.index
 }
 
-func Spacer(s string) {
-	if *verbose {
-		fmt.Println("")
-		for i := 0; i < 65; i++ {
-			fmt.Print(s)
-		}
-		fmt.Println("\n")
-	}
-}
-
 func NewDeck() *Deck {
 	deck := new(Deck)
 	for _, rank := range ranks {
