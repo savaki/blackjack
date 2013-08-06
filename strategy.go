@@ -4,6 +4,33 @@ import (
 	"fmt"
 )
 
+type Rule func(mine *Hand, theirs *Hand) bool
+
+type Strategy struct {
+	rules []Rule
+}
+
+func (s Strategy) Hit(mine *Hand, theirs *Hand) bool {
+	for _, rule := range s.rules {
+		if rule(mine, theirs) {
+			return true
+		}
+	}
+
+	return false
+}
+
+var (
+	playerStrategy = Strategy{[]Rule{
+		WizardHardHit,
+		WizardSoftHit,
+	}}
+	dealerStrategy = Strategy{[]Rule{
+		HitIfUnder17,
+		HitOnSoft17,
+	}}
+)
+
 func HitIfUnder17(mine *Hand, theirs *Hand) bool {
 	if mine.BestValue() < 17 {
 		if *verbose {

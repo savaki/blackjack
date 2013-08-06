@@ -107,8 +107,8 @@ func (h *Hand) BlackJack() bool {
 
 func (h *Hand) Bust() bool {
 	bust := len(h.Value()) == 0
-	if *verbose && bust {
-		fmt.Println("\tBust!")
+	if bust {
+		Log("\tBust!")
 	}
 	return bust // no values under 21
 }
@@ -119,10 +119,8 @@ type Deck struct {
 }
 
 func (d *Deck) Shuffle() {
-	if *verbose {
-		Spacer("=")
-		fmt.Println("Shuffling")
-	}
+	Spacer("=")
+	Log("Shuffling")
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i1, card1 := range d.cards {
@@ -156,22 +154,6 @@ func (d *Deck) Dump() {
 	}
 }
 
-type Rule func(mine *Hand, theirs *Hand) bool
-
-type Strategy struct {
-	rules []Rule
-}
-
-func (s Strategy) Hit(mine *Hand, theirs *Hand) bool {
-	for _, rule := range s.rules {
-		if rule(mine, theirs) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func Spacer(s string) {
 	if *verbose {
 		fmt.Println("")
@@ -185,18 +167,7 @@ func Spacer(s string) {
 func Play(deck *Deck, bet int) int {
 	Spacer("-")
 
-	if *verbose {
-		fmt.Printf("Playing Hand - %d cards remain\n", deck.Remaining())
-	}
-
-	playerStrategy := Strategy{[]Rule{
-		WizardHardHit,
-		WizardSoftHit,
-	}}
-	dealerStrategy := Strategy{[]Rule{
-		HitIfUnder17,
-		HitOnSoft17,
-	}}
+	Log("Playing Hand - %d cards remain\n", deck.Remaining())
 
 	player := new(Hand)
 	dealer := new(Hand)
@@ -207,75 +178,59 @@ func Play(deck *Deck, bet int) int {
 	deck.DealTo(player)
 	deck.DealTo(dealer)
 
-	if *verbose {
-		fmt.Printf("\tPlayer => %+v %+v\n", player.Value(), player)
-		fmt.Printf("\tDealer => %+v %+v\n", dealer.Value(), dealer)
-	}
+	Log("\tPlayer => %+v %+v\n", player.Value(), player)
+	Log("\tDealer => %+v %+v\n", dealer.Value(), dealer)
 
 	if player.BlackJack() && !dealer.BlackJack() {
-		if *verbose {
-			fmt.Println("Player Wins!  Blackjack!")
-		}
+		Log("Player Wins!  Blackjack!")
 		return int(float32(bet)*1.5) * *turbo
 	}
 
 	if dealer.BlackJack() && !player.BlackJack() {
-		if *verbose {
-			fmt.Println("Dealer Wins!  Blackjack!")
-		}
+		Log("Dealer Wins!  Blackjack!")
 		return -1 * bet
 	}
 
-	if *verbose {
-		fmt.Println("Player's turn ...")
-	}
+	Log("Player's turn ...")
 	for playerStrategy.Hit(player, dealer) {
 		card := deck.DealTo(player)
-		if *verbose {
-			fmt.Printf("\tPlayer draws %s => %d\n", card.String(), player.BestValue())
-		}
+		Log("\tPlayer draws %s => %d\n", card.String(), player.BestValue())
 		if player.Bust() {
-			if *verbose {
-				fmt.Println("Dealer wins!")
-			}
+			Log("Dealer wins!")
 			return -1 * bet
 		}
 	}
 
-	if *verbose {
-		fmt.Println("Dealer's turn ...")
-	}
+	Log("Dealer's turn ...")
 	for dealerStrategy.Hit(dealer, player) {
 		card := deck.DealTo(dealer)
-		if *verbose {
-			fmt.Printf("\tDealer draws %s => %d\n", card.String(), dealer.BestValue())
-		}
+		Log("\tDealer draws %s => %d\n", card.String(), dealer.BestValue())
 
 		if dealer.Bust() {
-			if *verbose {
-				fmt.Println("Player wins!")
-			}
+			Log("Player wins!")
 			return bet * *turbo
 		}
 	}
 
 	if player.Beats(dealer) {
-		if *verbose {
-			fmt.Println("Player wins!")
-		}
+		Log("Player wins!")
 		return bet * *turbo
 
 	} else if dealer.Beats(player) {
-		if *verbose {
-			fmt.Println("Dealer wins!")
-		}
+		Log("Dealer wins!")
 		return -1 * bet
 
 	} else {
-		if *verbose {
-			fmt.Println("Push!")
-		}
+		Log("Push!")
 		return 0
+	}
+}
+
+func Log(format string, args ...interface{}) (int, error) {
+	if *verbose {
+		return fmt.Printf(format, args...)
+	} else {
+		return 0, nil
 	}
 }
 
