@@ -115,3 +115,24 @@ func TestBlackJack(t *testing.T) {
 		t.Fatal("expected blackjack")
 	}
 }
+
+func TestSplit(t *testing.T) {
+	hand := &Hand{[]Card{
+		Card{King, Diamonds},
+		Card{Ace, Diamonds},
+	}, 0}
+
+	split := hand.Split()
+	if len(split[0].cards) != 1 {
+		t.Fatalf("expected 1 card in split[0]; actual was %d\n", len(split[0].cards))
+	}
+	if split[0].cards[0].rank.label != hand.cards[0].rank.label {
+		t.Fatalf("expected first card first; actual was %s\n", split[0].cards[0].rank.label)
+	}
+	if split[1].cards[0].rank.label != hand.cards[1].rank.label {
+		t.Fatalf("expected second card second; actual was %s\n", split[1].cards[0].rank.label)
+	}
+	if len(split[1].cards) != 1 {
+		t.Fatalf("expected 1 card in split[1]; actual was %d\n", len(split[1].cards))
+	}
+}
