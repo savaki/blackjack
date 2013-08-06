@@ -4,20 +4,29 @@ import (
 	"fmt"
 )
 
-type Rule func(mine *Hand, theirs *Hand) bool
+type Decision int
+
+const (
+	Skip Decision = iota
+	Hit
+	Double
+	Split
+)
+
+type Rule func(mine *Hand, theirs *Hand) Decision
 
 type Strategy struct {
 	rules []Rule
 }
 
-func (s Strategy) Hit(mine *Hand, theirs *Hand) bool {
+func (s Strategy) Decide(mine *Hand, theirs *Hand) Decision {
 	for _, rule := range s.rules {
-		if rule(mine, theirs) {
-			return true
+		if action := rule(mine, theirs); action != Skip {
+			return action
 		}
 	}
 
-	return false
+	return Skip
 }
 
 var (
@@ -31,63 +40,63 @@ var (
 	}}
 )
 
-func HitIfUnder17(mine *Hand, theirs *Hand) bool {
+func HitIfUnder17(mine *Hand, theirs *Hand) Decision {
 	if mine.BestValue() < 17 {
 		if *verbose {
 			fmt.Println("\t< 17 - Hit")
 		}
-		return true
+		return Hit
 
 	} else {
-		return false
+		return Skip
 	}
 }
 
-func HitOnSoft17(mine *Hand, theirs *Hand) bool {
+func HitOnSoft17(mine *Hand, theirs *Hand) Decision {
 	if mine.BestValue() == 17 && len(mine.Values()) == 2 {
 		if *verbose {
 			fmt.Println("\tSoft 17 - Hit")
 		}
-		return true
+		return Hit
 
 	} else {
-		return false
+		return Skip
 	}
 }
 
 // http://wizardofodds.com/games/blackjack/
-func WizardHardHit(mine *Hand, theirs *Hand) bool {
+func WizardHardHit(mine *Hand, theirs *Hand) Decision {
 	switch theirs.cards[0].rank.values[0] {
 
 	case 2, 3, 4, 5, 6:
 		switch mine.BestValue() {
 		case 4, 5, 6, 7, 8:
-			return true
+			return Hit
 
 		case 9, 10, 11:
-			return true // actually should double
+			return Hit // actually should double
 		}
 
 	case 7, 8, 9, 10, 1:
 		switch mine.BestValue() {
 		case 4, 5, 6, 7, 8, 9:
-			return true
+			return Hit
 
 		case 10, 11:
-			return true // actually should double
+			return Hit // actually should double
 
 		case 12, 13, 14, 15, 16:
-			return true
+			return Hit
 		}
 
 	}
 
-	return false
+	return Skip
 }
 
-func WizardSoftHit(mine *Hand, theirs *Hand) bool {
+func WizardSoftHit(mine *Hand, theirs *Hand) Decision {
 	if len(mine.Values()) == 1 {
-		return false // only check for soft hits
+		return Skip // only check for soft hits
 	}
 
 	switch theirs.cards[0].rank.values[0] {
@@ -95,16 +104,16 @@ func WizardSoftHit(mine *Hand, theirs *Hand) bool {
 	case 2, 3, 4, 5, 6:
 		switch mine.BestValue() {
 		case 13, 14, 15:
-			return true
+			return Skip
 		}
 
 	case 7, 8, 9, 10, 1:
 		switch mine.BestValue() {
 		case 13, 14, 15, 16, 17, 18:
-			return true
+			return Skip
 		}
 
 	}
 
-	return false
+	return Skip
 }

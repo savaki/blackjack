@@ -23,46 +23,50 @@ func Play(deck *Deck, bet int) int {
 	Log("\tDealer => %+v %+v\n", dealer.Values(), dealer)
 
 	if player.BlackJack() && !dealer.BlackJack() {
-		Log("Player Wins!  Blackjack!")
+		Log("Player Wins!  Blackjack!\n")
 		return int(float32(bet)*1.5) * *turbo
 	}
 
 	if dealer.BlackJack() && !player.BlackJack() {
-		Log("Dealer Wins!  Blackjack!")
+		Log("Dealer Wins!  Blackjack!\n")
 		return -1 * bet
 	}
 
-	Log("Player's turn ...")
-	for playerStrategy.Hit(player, dealer) {
+	Log("Player's turn ...\n")
+	for decision := playerStrategy.Decide(player, dealer); decision != Skip; {
 		card := deck.DealTo(player)
 		Log("\tPlayer draws %s => %d\n", card.String(), player.BestValue())
 		if player.Bust() {
-			Log("Dealer wins!")
+			Log("Dealer wins!\n")
 			return -1 * bet
 		}
+
+		decision = playerStrategy.Decide(player, dealer)
 	}
 
-	Log("Dealer's turn ...")
-	for dealerStrategy.Hit(dealer, player) {
+	Log("Dealer's turn ...\n")
+	for decision := dealerStrategy.Decide(dealer, player); decision != Skip; {
 		card := deck.DealTo(dealer)
 		Log("\tDealer draws %s => %d\n", card.String(), dealer.BestValue())
 
 		if dealer.Bust() {
-			Log("Player wins!")
+			Log("Player wins!\n")
 			return bet * *turbo
 		}
+
+		decision = dealerStrategy.Decide(dealer, player)
 	}
 
 	if player.Beats(dealer) {
-		Log("Player wins!")
+		Log("Player wins!\n")
 		return bet * *turbo
 
 	} else if dealer.Beats(player) {
-		Log("Dealer wins!")
+		Log("Dealer wins!\n")
 		return -1 * bet
 
 	} else {
-		Log("Push!")
+		Log("Push!\n")
 		return 0
 	}
 }

@@ -107,7 +107,7 @@ func (h *Hand) BlackJack() bool {
 func (h *Hand) Bust() bool {
 	bust := len(h.Values()) == 0
 	if bust {
-		Log("\tBust!")
+		Log("\tBust!\n")
 	}
 	return bust // no values under 21
 }
