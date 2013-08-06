@@ -44,7 +44,7 @@ func HitIfUnder17(mine *Hand, theirs *Hand) bool {
 }
 
 func HitOnSoft17(mine *Hand, theirs *Hand) bool {
-	if mine.BestValue() == 17 && len(mine.Value()) == 2 {
+	if mine.BestValue() == 17 && len(mine.Values()) == 2 {
 		if *verbose {
 			fmt.Println("\tSoft 17 - Hit")
 		}
@@ -86,7 +86,7 @@ func WizardHardHit(mine *Hand, theirs *Hand) bool {
 }
 
 func WizardSoftHit(mine *Hand, theirs *Hand) bool {
-	if len(mine.Value()) == 1 {
+	if len(mine.Values()) == 1 {
 		return false // only check for soft hits
 	}
 

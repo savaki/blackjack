@@ -63,7 +63,7 @@ func (h *Hand) String() string {
 }
 
 // value of hand and whether its soft or hard
-func (h *Hand) Value() []int {
+func (h *Hand) Values() []int {
 	sums := []int{0}
 
 	for _, card := range h.cards {
@@ -88,7 +88,7 @@ func (h *Hand) Value() []int {
 // the best value we can make with this hand <= 21
 func (h *Hand) BestValue() int {
 	best := -1
-	for _, value := range h.Value() {
+	for _, value := range h.Values() {
 		if value > best && value <= 21 {
 			best = value
 		}
@@ -97,7 +97,7 @@ func (h *Hand) BestValue() int {
 }
 
 func (h *Hand) BlackJack() bool {
-	for _, sum := range h.Value() {
+	for _, sum := range h.Values() {
 		if sum == 21 && len(h.cards) == 2 {
 			return true
 		}
@@ -106,7 +106,7 @@ func (h *Hand) BlackJack() bool {
 }
 
 func (h *Hand) Bust() bool {
-	bust := len(h.Value()) == 0
+	bust := len(h.Values()) == 0
 	if bust {
 		Log("\tBust!")
 	}
@@ -178,8 +178,8 @@ func Play(deck *Deck, bet int) int {
 	deck.DealTo(player)
 	deck.DealTo(dealer)
 
-	Log("\tPlayer => %+v %+v\n", player.Value(), player)
-	Log("\tDealer => %+v %+v\n", dealer.Value(), dealer)
+	Log("\tPlayer => %+v %+v\n", player.Values(), player)
+	Log("\tDealer => %+v %+v\n", dealer.Values(), dealer)
 
 	if player.BlackJack() && !dealer.BlackJack() {
 		Log("Player Wins!  Blackjack!")
