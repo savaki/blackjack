@@ -9,7 +9,7 @@ func TestMain(t *testing.T) {
 }
 
 func TestValueOfEmptyHand(t *testing.T) {
-	hand := &Hand{[]Card{}}
+	hand := &Hand{[]Card{}, 0}
 	if len(hand.Values()) != 1 {
 		t.Fatal("expected 1 value")
 	}
@@ -21,7 +21,7 @@ func TestValueOfEmptyHand(t *testing.T) {
 func TestValueOfAceHand(t *testing.T) {
 	hand := &Hand{[]Card{
 		Card{Ace, Spades},
-	}}
+	}, 0}
 
 	if len(hand.Values()) != 2 {
 		t.Fatal("expected 2 values")
@@ -37,7 +37,7 @@ func TestValueOfAceHand(t *testing.T) {
 func TestValueOfKingHand(t *testing.T) {
 	hand := &Hand{[]Card{
 		Card{King, Spades},
-	}}
+	}, 0}
 	if len(hand.Values()) != 1 {
 		t.Fatal("expected 1 value")
 	}
@@ -50,7 +50,7 @@ func TestValueOfKingKingHand(t *testing.T) {
 	hand := &Hand{[]Card{
 		Card{King, Spades},
 		Card{King, Clubs},
-	}}
+	}, 0}
 	if len(hand.Values()) != 1 {
 		t.Fatal("expected 1 value")
 	}
@@ -63,7 +63,7 @@ func TestValueOfAceKingHand(t *testing.T) {
 	hand := &Hand{[]Card{
 		Card{Ace, Spades},
 		Card{King, Clubs},
-	}}
+	}, 0}
 	if len(hand.Values()) != 2 {
 		t.Fatal("expected 1 value")
 	}
@@ -79,7 +79,7 @@ func TestValueOfAceAceHand(t *testing.T) {
 	hand := &Hand{[]Card{
 		Card{Ace, Spades},
 		Card{Ace, Clubs},
-	}}
+	}, 0}
 	if len(hand.Values()) != 3 {
 		t.Fatalf("expected 3 values; got %#v\n", hand.Values())
 	}
@@ -98,7 +98,7 @@ func TestBlackJackOn15(t *testing.T) {
 	hand := &Hand{[]Card{
 		Card{King, Diamonds},
 		Card{Five, Diamonds},
-	}}
+	}, 0}
 
 	if hand.BlackJack() {
 		t.Fatal("should not be blackjack")
@@ -109,7 +109,7 @@ func TestBlackJack(t *testing.T) {
 	hand := &Hand{[]Card{
 		Card{King, Diamonds},
 		Card{Ace, Diamonds},
-	}}
+	}, 0}
 
 	if !hand.BlackJack() {
 		t.Fatal("expected blackjack")

@@ -51,6 +51,18 @@ func (c Card) String() string {
 
 type Hand struct {
 	cards []Card
+	bet   int
+}
+
+func (h *Hand) Split() []*Hand {
+	if len(h.cards) != 2 {
+		panic("can only split with 2 cards")
+	}
+
+	return []*Hand{
+		&Hand{[]Card{h.cards[0]}, h.bet},
+		&Hand{[]Card{h.cards[1]}, h.bet},
+	}
 }
 
 func (h *Hand) String() string {

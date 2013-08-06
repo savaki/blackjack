@@ -10,8 +10,9 @@ func Play(deck *Deck, bet int) int {
 
 	Log("Playing Hand - %d cards remain\n", deck.Remaining())
 
-	player := new(Hand)
 	dealer := new(Hand)
+	player := new(Hand)
+	player.bet = bet
 
 	deck.DealTo(player)
 	deck.DealTo(dealer)
@@ -22,27 +23,13 @@ func Play(deck *Deck, bet int) int {
 	Log("\tPlayer => %+v %+v\n", player.Values(), player)
 	Log("\tDealer => %+v %+v\n", dealer.Values(), dealer)
 
-	if player.BlackJack() && !dealer.BlackJack() {
-		Log("Player Wins!  Blackjack!\n")
-		return int(float32(bet)*1.5) * *turbo
-	}
-
 	if dealer.BlackJack() && !player.BlackJack() {
 		Log("Dealer Wins!  Blackjack!\n")
 		return -1 * bet
 	}
 
 	Log("Player's turn ...\n")
-	for decision := playerStrategy.Decide(player, dealer); decision != Skip; {
-		card := deck.DealTo(player)
-		Log("\tPlayer draws %s => %d\n", card.String(), player.BestValue())
-		if player.Bust() {
-			Log("Dealer wins!\n")
-			return -1 * bet
-		}
-
-		decision = playerStrategy.Decide(player, dealer)
-	}
+	hands := player.PlayStrategy(playerStrategy, dealer, deck)
 
 	Log("Dealer's turn ...\n")
 	for decision := dealerStrategy.Decide(dealer, player); decision != Skip; {
@@ -50,25 +37,37 @@ func Play(deck *Deck, bet int) int {
 		Log("\tDealer draws %s => %d\n", card.String(), dealer.BestValue())
 
 		if dealer.Bust() {
-			Log("Player wins!\n")
-			return bet * *turbo
+			sum := 0
+			for index, hand := range hands {
+				Log("Hand %d: Player wins!\n", index)
+				sum = sum + (hand.bet * *turbo)
+			}
+			return sum
 		}
 
 		decision = dealerStrategy.Decide(dealer, player)
 	}
 
-	if player.Beats(dealer) {
-		Log("Player wins!\n")
-		return bet * *turbo
+	// calculate how we did for each of the hands
+	sum := 0
+	for index, hand := range hands {
+		if hand.BlackJack() {
+			Log("Hand %d: Blackjack!\n", index)
+			sum = sum + (hand.bet * *turbo * 3 / 2)
 
-	} else if dealer.Beats(player) {
-		Log("Dealer wins!\n")
-		return -1 * bet
+		} else if hand.Beats(dealer) {
+			Log("Hand %d: Player wins!\n", index)
+			sum = sum + (hand.bet * *turbo)
 
-	} else {
-		Log("Push!\n")
-		return 0
+		} else if dealer.Beats(&hand) {
+			Log("Hand %d: Dealer wins!\n", index)
+			sum = sum - hand.bet
+
+		} else {
+			Log("Hand %d: Push!\n", index)
+		}
 	}
+	return sum
 }
 
 func Spacer(s string) {
@@ -107,6 +106,12 @@ func main() {
 		deck.Shuffle()
 		for deck.Remaining() > 20 {
 			result := Play(deck, bet)
+
+			if result > 0 {
+				Log("+%d\n", result)
+			} else if result < 0 {
+				Log("%d\n", result)
+			}
 			cash = cash + result
 			hands = hands + 1
 		}
