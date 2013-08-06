@@ -10,10 +10,6 @@ import (
 )
 
 type Suite string
-type Rank struct {
-	values []int
-	label  string
-}
 
 const (
 	Clubs    Suite = "Clubs"
@@ -21,6 +17,11 @@ const (
 	Diamonds Suite = "Diamonds"
 	Spades   Suite = "Spades"
 )
+
+type Rank struct {
+	values []int
+	label  string
+}
 
 var (
 	Ace    = Rank{[]int{1, 11}, "Ace"}
@@ -47,11 +48,6 @@ type Card struct {
 
 func (c Card) String() string {
 	return fmt.Sprintf("%s of %s", c.rank.label, c.suite)
-}
-
-type Deck struct {
-	index int
-	cards []Card
 }
 
 type Hand struct {
@@ -115,6 +111,11 @@ func (h *Hand) Bust() bool {
 		fmt.Println("\tBust!")
 	}
 	return bust // no values under 21
+}
+
+type Deck struct {
+	index int
+	cards []Card
 }
 
 func (d *Deck) Shuffle() {
